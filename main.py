@@ -1,7 +1,6 @@
 import streamlit as st
 import backend
-from newspaper import Article, Config
-
+from newspaper import Article, Config, ArticleException
 
 st.title(":blue[_NEWS_]-ANALYSIS", text_alignment="center")
 topic = st.text_input("Enter topic")
@@ -10,9 +9,11 @@ if topic:
     content = backend.get_info(topic)
     st.subheader(f"Available :green[{content["totalResults"]}] top headlines for :green[_{topic}_]")
 
-    i = 1
+    counter = 0
+    f_counter = 0
 
-    for news in content["articles"][:6]:
+    for index,news in enumerate(content["articles"],start = 1):
+
         config = Config()
         config.proxies = {
             "http": "http://us2512v1ej33:myjx887ixdxds36@193.56.28.63:3129",
@@ -26,8 +27,22 @@ if topic:
         config.request_timeout = 20
 
         article = Article(news['url'], config=config)
-        article.download()
-        article.parse()
+
+        try:
+            article.download()
+            article.parse()
+        except ArticleException as e:
+            with open('ruledout.txt', 'a') as file:
+                file.write(f"URL: {news['url']}\n")
+                file.write(f"Exception type: {type(e).__name__}\n")
+                file.write(f"Exception message: {str(e)}\n")
+                file.write("-" * 50 + "\n")
+            f_counter += 1
+            continue
+
         st.write(article.text)
-        st.write(i)
-        i = i+1
+        st.write('-----')
+        counter += 1
+
+    st.subheader(f"{counter} of {content["totalResults"]} displayed")
+    st.subheader(f"{f_counter} articles failed")
