@@ -7,7 +7,7 @@ topic = st.text_input("Enter topic")
 
 if topic:
     content = backend.get_info(topic)
-    st.subheader(f"Available :green[{content["totalResults"]}] top headlines for :green[_{topic}_]")
+    st.subheader(f"Available :green[{len(content["articles"])}] top headlines for :green[_{topic}_]")
 
     counter = 0
     f_counter = 0
@@ -44,5 +44,5 @@ if topic:
         st.write('-----')
         counter += 1
 
-    st.subheader(f"{counter} of {content["totalResults"]} displayed")
+    st.subheader(f"{counter} of {len(content["articles"])} displayed")
     st.subheader(f"{f_counter} articles failed")
