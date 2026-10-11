@@ -4,8 +4,8 @@ import streamlit as st
 
 API_KEY = "//API-KEY//"
 
-def get_api(topic):
-    url = f"https://newsapi.org/v2/top-headlines?q={topic}&apiKey={API_KEY}"
+def get_api(topic,start,end):
+    url = f"https://newsapi.org/v2/everything?q={topic}&from={start}&to={end}&sortBy=relevancy&language=en&apiKey={API_KEY}"
     response = requests.get(url)
     content = response.json()
     return content
