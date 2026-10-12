@@ -3,7 +3,7 @@ from newspaper import Article, Config, ArticleException
 import streamlit as st
 from nltk.sentiment import SentimentIntensityAnalyzer
 
-API_KEY = "9e5609838c2c482491361790dec782ab"
+API_KEY = "//API-KEY//"
 
 def get_api(topic,start,end):
     url = f"https://newsapi.org/v2/everything?q={topic}&from={start}&to={end}&sortBy=relevancy&language=en&apiKey={API_KEY}"
