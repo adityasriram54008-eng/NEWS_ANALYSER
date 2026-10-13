@@ -66,5 +66,5 @@ def get_articles(content,topic):
             st.write('-----')
             counter += 1
 
-    return counter,f_counter
+    return counter,f_counter,pos_counter,neg_counter
 
