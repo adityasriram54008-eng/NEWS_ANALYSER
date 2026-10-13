@@ -16,6 +16,8 @@ def get_articles(content,topic):
     st.subheader(f"Available :green[{len(content["articles"])}] top headlines for :green[_{topic}_]")
     counter = 0
     f_counter = 0
+    pos_counter = 0
+    neg_counter = 0
 
     config = Config()
     config.proxies = {
@@ -53,7 +55,14 @@ def get_articles(content,topic):
             continue
         else:
             index = analyzer.polarity_scores(article.text)
-            st.write(index)
+            if(index['compound']>0):
+                pos_counter += 1
+            else:
+                neg_counter += 1
+            st.write(news['url'])
+            st.write(f"Compound: {index['compound']}")
+            st.write(f"Positivity: {index['pos']}")
+            st.write(f"Negativity: {index['neg']}")
             st.write('-----')
             counter += 1
 
