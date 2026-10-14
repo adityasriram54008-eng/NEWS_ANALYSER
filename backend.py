@@ -12,9 +12,11 @@ def get_api(topic,start,end):
     content = response.json()
     return content
 
-def get_articles(content,topic):
+def get_articles(content, topic):
     in_time = time.time()
-    st.subheader(f"Available :green[{len(content["articles"])}] top headlines for :green[_{topic}_]")
+
+    st.subheader(f"Available :green[{len(content['articles'])}] top headlines for :green[_{topic}_]")
+
     counter = 0
     f_counter = 0
     pos_counter = 0
@@ -37,53 +39,75 @@ def get_articles(content,topic):
 
     for news in content["articles"][:20]:
         start_timef = time.time()
-
-        article = Article(news['url'], config=config)
+        start_time = None
+        end_time = None
+        outcome = "unknown"
+        error_details = ""
 
         try:
+            article = Article(news['url'], config=config)
+
             start_time = time.time()
             article.download()
             article.parse()
             end_time = time.time()
 
-        except ArticleException as e:
-            with open('ruledout.txt', 'a') as file:
-                file.write(f"URL: {news['url']}\n")
-                file.write(f"Exception type: {type(e).__name__}\n")
-                file.write(f"Exception message: {str(e)}\n")
-                file.write("-" * 50 + "\n")
-            f_counter += 1
-            continue
+            if len(article.text) < 200:
+                f_counter += 1
+                outcome = "short_text"
 
-        if (len(article.text)) < 200:
-            f_counter += 1
-            continue
-        else:
-            index = analyzer.polarity_scores(article.text)
-            if index['compound']>0.05:
-                pos_counter += 1
-            elif index['compound']< -0.05:
-                neg_counter += 1
             else:
-                neu_counter += 1
+                index = analyzer.polarity_scores(article.text)
+                if index['compound'] > 0.05:
+                    pos_counter += 1
+                elif index['compound'] < -0.05:
+                    neg_counter += 1
+                else:
+                    neu_counter += 1
 
-            st.write(news['url'])
-            st.write(f"Compound: {index['compound']}")
-            st.write(f"Positivity: {index['pos']}")
-            st.write(f"Negativity: {index['neg']}")
-            st.write('-----')
-            counter += 1
+                st.write(news['url'])
+                st.write(f"Compound: {index['compound']}")
+                st.write(f"Positivity: {index['pos']}")
+                st.write(f"Negativity: {index['neg']}")
+                st.write('-----')
 
+                counter += 1
+                outcome = "success"
+
+        except Exception as e:
+            error_details = f"{type(e).__name__}: {str(e)}"
+            outcome = "extraction_error"
+            f_counter += 1
+
+        finally:
             end_timef = time.time()
 
-            time_elapsed = end_time - start_time
+            if start_time is not None:
+                if end_time is None:
+                    end_time = time.time()
+                time_elapsed = end_time - start_time
+            else:
+                time_elapsed = 0.0
+
             time_elapsedf = end_timef - start_timef
 
-            with open('complete_time.txt','a') as file:
-                file.write(f"{time_elapsedf}\n")
-            with open('time_in_dp.txt','a') as file:
-                file.write(f"{time_elapsed}\n")
+            with open('article_outcomes.txt', 'a') as file:
+                file.write(f"URL: {news['url']}\n")
+                file.write(f"Outcome: {outcome}\n")
+                file.write(
+                    f"Download and parse time: "
+                    f"{time_elapsed:.4f} seconds\n")
+                file.write(
+                    f"Total article time: "
+                    f"{time_elapsedf:.4f} seconds\n")
+
+                if error_details:
+                    file.write(f"Error: {error_details}\n")
+
+                file.write("-" * 50 + "\n")
+
     out_time = time.time()
     f_elapsed = out_time - in_time
-    return counter,f_counter,pos_counter,neg_counter, neu_counter, f_elapsed
+
+    return counter,f_counter,pos_counter,neg_counter,neu_counter,f_elapsed
 
