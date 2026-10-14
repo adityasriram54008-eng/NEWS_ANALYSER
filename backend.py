@@ -18,6 +18,7 @@ def get_articles(content,topic):
     f_counter = 0
     pos_counter = 0
     neg_counter = 0
+    neu_counter = 0
 
     config = Config()
     config.proxies = {
@@ -55,10 +56,13 @@ def get_articles(content,topic):
             continue
         else:
             index = analyzer.polarity_scores(article.text)
-            if(index['compound']>0):
+            if index['compound']>0.05:
                 pos_counter += 1
-            else:
+            elif index['compound']< -0.05:
                 neg_counter += 1
+            else:
+                neu_counter += 1
+
             st.write(news['url'])
             st.write(f"Compound: {index['compound']}")
             st.write(f"Positivity: {index['pos']}")
@@ -66,5 +70,5 @@ def get_articles(content,topic):
             st.write('-----')
             counter += 1
 
-    return counter,f_counter,pos_counter,neg_counter
+    return counter,f_counter,pos_counter,neg_counter, neu_counter
 
