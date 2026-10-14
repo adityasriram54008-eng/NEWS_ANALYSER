@@ -11,10 +11,11 @@ if topic:
     if start and end:
 
         content = backend.get_api(topic,start,end)
-        counter, f_counter, pos_counter,neg_counter, neu_counter = backend.get_articles(content,topic)
+        counter, f_counter, pos_counter,neg_counter, neu_counter, f_elapsed = backend.get_articles(content,topic)
 
         st.subheader(f"Positive articles: :blue[{pos_counter}]")
         st.subheader(f"Negative articles: :blue[{neg_counter}]")
         st.subheader(f"Neutral articles: :blue[{neu_counter}]")
         st.subheader(f":blue[{counter}] of :green[{len(content["articles"])}] displayed")
         st.subheader(f":red[{f_counter}] articles failed")
+        st.subheader(f":red[{f_elapsed}]")

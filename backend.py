@@ -2,8 +2,9 @@ import requests
 from newspaper import Article, Config, ArticleException
 import streamlit as st
 from nltk.sentiment import SentimentIntensityAnalyzer
+import time
 
-API_KEY = "//API-KEY//"
+API_KEY = "9e5609838c2c482491361790dec782ab"
 
 def get_api(topic,start,end):
     url = f"https://newsapi.org/v2/everything?q={topic}&from={start}&to={end}&sortBy=relevancy&language=en&apiKey={API_KEY}"
@@ -12,7 +13,7 @@ def get_api(topic,start,end):
     return content
 
 def get_articles(content,topic):
-
+    in_time = time.time()
     st.subheader(f"Available :green[{len(content["articles"])}] top headlines for :green[_{topic}_]")
     counter = 0
     f_counter = 0
@@ -34,13 +35,16 @@ def get_articles(content,topic):
 
     analyzer = SentimentIntensityAnalyzer()
 
-    for index, news in enumerate(content["articles"], start=1):
+    for news in content["articles"][:20]:
+        start_timef = time.time()
 
         article = Article(news['url'], config=config)
 
         try:
+            start_time = time.time()
             article.download()
             article.parse()
+            end_time = time.time()
 
         except ArticleException as e:
             with open('ruledout.txt', 'a') as file:
@@ -70,5 +74,16 @@ def get_articles(content,topic):
             st.write('-----')
             counter += 1
 
-    return counter,f_counter,pos_counter,neg_counter, neu_counter
+            end_timef = time.time()
+
+            time_elapsed = end_time - start_time
+            time_elapsedf = end_timef - start_timef
+
+            with open('complete_time.txt','a') as file:
+                file.write(f"{time_elapsedf}\n")
+            with open('time_in_dp.txt','a') as file:
+                file.write(f"{time_elapsed}\n")
+    out_time = time.time()
+    f_elapsed = out_time - in_time
+    return counter,f_counter,pos_counter,neg_counter, neu_counter, f_elapsed
 
