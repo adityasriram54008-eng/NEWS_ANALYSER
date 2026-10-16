@@ -1,7 +1,6 @@
 import requests
 from newspaper import Article, Config, ArticleException
 import streamlit as st
-import nltk
 from nltk.sentiment import SentimentIntensityAnalyzer
 import time
 
@@ -36,7 +35,6 @@ def get_articles(content, topic):
     )
     config.request_timeout = 20
 
-    nltk.download('vader_lexicon')
     analyzer = SentimentIntensityAnalyzer()
 
     for news in content["articles"][:20]:
